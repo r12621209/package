@@ -1,12 +1,3 @@
-packages <- c("sommer", "doParallel")
-installed <- packages %in% rownames(installed.packages())
-if (any(!installed)) {
-  install.packages(packages[!installed])
-}
-
-library(sommer)
-library(doParallel)
-
 
 #' Simulates 5 environments with 5-fold and 8-fold cross-validation (CV-O, CV-NO).
 #'
@@ -19,6 +10,10 @@ library(doParallel)
 #' @param fold      Different cross-validation methods, such as 5-fold and 8-fold.
 #' @param random    A random seed number.
 #' @export
+#' @import sommer
+#' @import doParallel
+#' @import MASS
+#' @import dplyr
 #' @examples
 #'
 #' mu <- c(10,15,20,25,30)
