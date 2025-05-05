@@ -1,3 +1,9 @@
+packages <- c("sommer", "doParallel")
+installed <- packages %in% rownames(installed.packages())
+if (any(!installed)) {
+  install.packages(packages[!installed])
+}
+
 library(sommer)
 library(doParallel)
 
