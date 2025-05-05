@@ -1,11 +1,3 @@
-packages <- c("sommer", "doParallel")
-installed <- packages %in% rownames(installed.packages())
-if (any(!installed)) {
-  install.packages(packages[!installed])
-}
-
-library(sommer)
-library(doParallel)
 
 #' Simulates 3 environments with 3-fold and 4-fold cross-validation (CV-O, CV-NO).
 #'
