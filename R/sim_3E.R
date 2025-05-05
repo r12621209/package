@@ -1,4 +1,3 @@
-
 #' Simulates 3 environments with 3-fold and 4-fold cross-validation (CV-O, CV-NO).
 #'
 #' @param omgaG_v0  A diagonal variance-covariance matrix across environments.
@@ -12,7 +11,6 @@
 #' @export
 #' @import sommer
 #' @import doParallel
-#' @import parallel
 #' @import MASS
 #' @import dplyr
 #' @examples
