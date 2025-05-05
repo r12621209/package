@@ -3,3 +3,7 @@
 export(fold_3_4)
 export(sim_3E)
 export(sim_5E)
+import(sommer)
+import(doParallel)
+import(MASS)
+import(dplyr)
