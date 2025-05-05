@@ -1,3 +1,4 @@
+library(doParallel)
 #' Cross-validation for 3-fold and 4-fold with CV-O and CV-NO
 #'
 #' @param Y         A data.frame containing "trait", "environment", and "name".
