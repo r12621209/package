@@ -13,5 +13,6 @@ RoxygenNote: 7.2.3
 Imports:
     sommer,
     doParallel,
+    parallel,
     MASS,
     dplyr
