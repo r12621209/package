@@ -10,6 +10,10 @@
 #' @param fold      Different cross-validation methods, such as 3-fold and 4-fold.
 #' @param random    A random seed number.
 #' @export
+#' @import sommer
+#' @import doParallel
+#' @import MASS
+#' @import dplyr
 #' @examples
 #'
 #' mu <- c(10,15,20)
