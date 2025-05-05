@@ -24,7 +24,6 @@ sim_3E = function(omgaG_v0, Y, mu, rho, K, cv, fold, random){
   
   ### set prior parameters
   k=nrow(K)
-  omgaG_v0=diag(c(1,1.5,2))
   mu <- rep(mu,each=k)
   
   ### Compute the covariance matrix and the diagonal matrix
