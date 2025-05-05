@@ -1,4 +1,4 @@
-
+library(doParallel)
 #' Simulates 5 environments with 5-fold and 8-fold cross-validation (CV-O, CV-NO).
 #'
 #' @param omgaG_v0  A diagonal variance-covariance matrix across environments.
