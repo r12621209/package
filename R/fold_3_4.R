@@ -1,12 +1,3 @@
-packages <- c("sommer", "doParallel")
-installed <- packages %in% rownames(installed.packages())
-if (any(!installed)) {
-  install.packages(packages[!installed])
-}
-
-library(sommer)
-library(doParallel)
-
 #' Cross-validation for 3-fold and 4-fold with CV-O and CV-NO
 #'
 #' @param Y         A data.frame containing "trait", "environment", and "name".
