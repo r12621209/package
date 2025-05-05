@@ -6,6 +6,10 @@
 #' @param fold      Different cross-validation methods, such as 5-fold and 8-fold.
 #' @param random    A random seed number.
 #' @export
+#' @import sommer
+#' @import doParallel
+#' @import MASS
+#' @import dplyr
 #' @examples
 #' 
 #' fold_3_cvO <- fold_3_4(Y=Yt2.s,K=K.t2,cv=1,fold=3,random=0)
