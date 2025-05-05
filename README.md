@@ -14,6 +14,6 @@ You can install from GitHub using the `devtools` package:
 # First, make sure devtools is installed
 install.packages("devtools")
 
-# Then install EHPGS from GitHub
+# Then install from GitHub
 library(devtools)
 install_github("r12621209/package", dependencies = TRUE, force = TRUE)
