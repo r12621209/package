@@ -12,6 +12,7 @@
 #' @export
 #' @import sommer
 #' @import doParallel
+#' @import parallel
 #' @import MASS
 #' @import dplyr
 #' @examples
