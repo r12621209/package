@@ -1,7 +1,7 @@
 library(doParallel)
 #' Cross-validation for 3-fold and 4-fold with CV-O and CV-NO
 #'
-#' @param Y         A data.frame containing "trait", "environment", and "name".
+#' @param Y         A data.frame containing "Trait", "Name", and "ENV".
 #' @param K         An additive genetic relationship matrix.
 #' @param cv        Different cross-validation problems, CV-O=1 and CV-NO=2.
 #' @param fold      Different cross-validation methods, such as 5-fold and 8-fold.
@@ -36,7 +36,7 @@ fold_3_4 <- function(Y,K,cv,fold,random){
       
       ### AGBLUP model
       A=NULL 
-      A <- mmer(Yield ~ Env,
+      A <- mmer(Trait ~ Env,
                 random = ~ vsr(Env:Name, Gu = EA),
                 rcov = ~ vsr(dsr(Env), units),
                 data = Yna, verbose = FALSE,
@@ -45,7 +45,7 @@ fold_3_4 <- function(Y,K,cv,fold,random){
       
       ### WGBLUP model
       W=NULL 
-      W <- mmer(Yield ~ Env,
+      W <- mmer(Trait ~ Env,
                 random = ~ vsr(dsr(Env), Name, Gu = K),
                 rcov = ~ vsr(dsr(Env), units),
                 method = 'AI',
@@ -55,7 +55,7 @@ fold_3_4 <- function(Y,K,cv,fold,random){
       ### MGE model
       MGE=NULL 
       MGE <- tryCatch({
-        mmer(Yield ~ Env,
+        mmer(Trait ~ Env,
              random = ~ vsr(Name, Gu = K) + vsr(dsr(Env), Name, Gu = K),
              rcov = ~ vsr(dsr(Env), units),
              data = Yna, verbose = FALSE,
@@ -65,7 +65,7 @@ fold_3_4 <- function(Y,K,cv,fold,random){
         for (rep in 1:100) {
           tolParInv <- 1e-06 + 0.0005 * rep
           MGE <- tryCatch({
-            mmer(Yield ~ Env,
+            mmer(Trait ~ Env,
                  random = ~ vsr(Name, Gu = K) + vsr(dsr(Env), Name, Gu = K),
                  rcov = ~ vsr(dsr(Env), units),
                  data = Yna, verbose = FALSE,
@@ -80,7 +80,7 @@ fold_3_4 <- function(Y,K,cv,fold,random){
       ### MGBLUP model
       M=NULL 
       M <- tryCatch({
-        mmer(Yield ~ Env,
+        mmer(Trait ~ Env,
              random = ~ vsr(usr(Env), Name, Gu = K),
              rcov = ~ vsr(dsr(Env), units),
              data = Yna,
@@ -92,7 +92,7 @@ fold_3_4 <- function(Y,K,cv,fold,random){
         for (rep in 1:200) {
           tolParInv <- 1e-06 + 0.2 * rep
           M <- tryCatch({
-            mmer(Yield ~ Env,
+            mmer(Trait ~ Env,
                  random = ~ vsr(usr(Env), Name, Gu = K),
                  rcov = ~ vsr(dsr(Env), units),
                  data = Yna,
@@ -113,25 +113,25 @@ fold_3_4 <- function(Y,K,cv,fold,random){
       
       ### Compute correlation coefficients
       Z0 <- rep(c(A[["Beta"]][["Estimate"]][1], sum(A[["Beta"]][["Estimate"]][1:2])), each = k)
-      Z1 <- A[["U"]][["u:Env:Name"]][["Yield"]]
-      res[1]=cor((Z0+Z1)[ENV1],l$Yield[ENV1])
-      res[2]=cor((Z0+Z1)[ENV2],l$Yield[ENV2])    
+      Z1 <- A[["U"]][["u:Env:Name"]][["Trait"]]
+      res[1]=cor((Z0+Z1)[ENV1],l$Trait[ENV1])
+      res[2]=cor((Z0+Z1)[ENV2],l$Trait[ENV2])    
       
       Z0 <- rep(c(W[["Beta"]][["Estimate"]][1], W[["Beta"]][["Estimate"]][1] + W[["Beta"]][["Estimate"]][-1]), each = k)
       Z1 <- unlist(W[["U"]])
-      res[3]=cor((Z0+Z1)[ENV1],l$Yield[ENV1])
-      res[4]=cor((Z0+Z1)[ENV2],l$Yield[ENV2])    
+      res[3]=cor((Z0+Z1)[ENV1],l$Trait[ENV1])
+      res[4]=cor((Z0+Z1)[ENV2],l$Trait[ENV2])    
       
       Z0 <- rep(c(MGE[["Beta"]][["Estimate"]][1], MGE[["Beta"]][["Estimate"]][1] + MGE[["Beta"]][["Estimate"]][-1]), each = k)
       Z1 <- unlist(MGE[["U"]][-1]) + unlist(MGE[["U"]][1])
-      res[5]=cor((Z0+Z1)[ENV1],l$Yield[ENV1])
-      res[6]=cor((Z0+Z1)[ENV2],l$Yield[ENV2])    
+      res[5]=cor((Z0+Z1)[ENV1],l$Trait[ENV1])
+      res[6]=cor((Z0+Z1)[ENV2],l$Trait[ENV2])    
       
       Z0 <- rep(c(M[["Beta"]][["Estimate"]][1], sum(M[["Beta"]][["Estimate"]][1:2])), each = k)
-      Z1 <- c(M[["U"]][["1:Name"]][["Yield"]] + M[["U"]][["2:1:Name"]][["Yield"]][-(1:k)],
-              M[["U"]][["2:Name"]][["Yield"]] + M[["U"]][["2:1:Name"]][["Yield"]][(1:k)])
-      res[7]=cor((Z0+Z1)[ENV1],l$Yield[ENV1])
-      res[8]=cor((Z0+Z1)[ENV2],l$Yield[ENV2])    
+      Z1 <- c(M[["U"]][["1:Name"]][["Trait"]] + M[["U"]][["2:1:Name"]][["Trait"]][-(1:k)],
+              M[["U"]][["2:Name"]][["Trait"]] + M[["U"]][["2:1:Name"]][["Trait"]][(1:k)])
+      res[7]=cor((Z0+Z1)[ENV1],l$Trait[ENV1])
+      res[8]=cor((Z0+Z1)[ENV2],l$Trait[ENV2])    
       
       if(!is.null(M)){     
         if (M[["sigma"]][["1:Name"]]<=0) {
@@ -158,7 +158,7 @@ fold_3_4 <- function(Y,K,cv,fold,random){
       EA <- kronecker(E, K, make.dimnames = TRUE)
       
       A=NULL 
-      A <- mmer(Yield ~ Env,
+      A <- mmer(Trait ~ Env,
                 random = ~ vsr(Env:Name, Gu = EA),
                 rcov = ~ vsr(dsr(Env), units),
                 data = Yna, verbose = FALSE,
@@ -167,7 +167,7 @@ fold_3_4 <- function(Y,K,cv,fold,random){
       
       ### WGBLUP model
       W=NULL 
-      W <- mmer(Yield ~ Env,
+      W <- mmer(Trait ~ Env,
                 random = ~ vsr(dsr(Env), Name, Gu = K),
                 rcov = ~ vsr(dsr(Env), units),
                 method = 'AI',
@@ -178,7 +178,7 @@ fold_3_4 <- function(Y,K,cv,fold,random){
       ### MGE model
       MGE=NULL 
       MGE <- tryCatch({
-        mmer(Yield ~ Env,
+        mmer(Trait ~ Env,
              random = ~ vsr(Name, Gu = K) + vsr(dsr(Env), Name, Gu = K),
              rcov = ~ vsr(dsr(Env), units),
              data = Yna, verbose = FALSE,
@@ -188,7 +188,7 @@ fold_3_4 <- function(Y,K,cv,fold,random){
         for (rep in 1:100) {
           tolParInv <- 1e-06 + 0.0005 * rep
           MGE <- tryCatch({
-            mmer(Yield ~ Env,
+            mmer(Trait ~ Env,
                  random = ~ vsr(Name, Gu = K) + vsr(dsr(Env), Name, Gu = K),
                  rcov = ~ vsr(dsr(Env), units),
                  data = Yna, verbose = FALSE,
@@ -203,7 +203,7 @@ fold_3_4 <- function(Y,K,cv,fold,random){
       ### MGBLUP model
       M=NULL 
       M <- tryCatch({
-        mmer(Yield ~ Env,
+        mmer(Trait ~ Env,
              random = ~ vsr(usr(Env), Name, Gu = K),
              rcov = ~ vsr(dsr(Env), units),
              data = Yna,
@@ -215,7 +215,7 @@ fold_3_4 <- function(Y,K,cv,fold,random){
         for (rep in 1:100) {
           tolParInv <- 1e-06 + 0.05 * rep
           M <- tryCatch({
-            mmer(Yield ~ Env,
+            mmer(Trait ~ Env,
                  random = ~ vsr(usr(Env), Name, Gu = K),
                  rcov = ~ vsr(dsr(Env), units),
                  data = Yna,
@@ -237,30 +237,30 @@ fold_3_4 <- function(Y,K,cv,fold,random){
       
       ### Compute correlation coefficients
       Z0 <- rep(c(A[["Beta"]][["Estimate"]][1], A[["Beta"]][["Estimate"]][1] + A[["Beta"]][["Estimate"]][-1]), each = k)
-      Z1 <- A[["U"]][["u:Env:Name"]][["Yield"]]
-      res[1]=cor((Z0+Z1)[ENV1],l$Yield[ENV1])
-      res[2]=cor((Z0+Z1)[ENV2],l$Yield[ENV2])
-      res[3]=cor((Z0+Z1)[ENV3],l$Yield[ENV3])
+      Z1 <- A[["U"]][["u:Env:Name"]][["Trait"]]
+      res[1]=cor((Z0+Z1)[ENV1],l$Trait[ENV1])
+      res[2]=cor((Z0+Z1)[ENV2],l$Trait[ENV2])
+      res[3]=cor((Z0+Z1)[ENV3],l$Trait[ENV3])
       
       Z0 <- rep(c(W[["Beta"]][["Estimate"]][1], W[["Beta"]][["Estimate"]][1] + W[["Beta"]][["Estimate"]][-1]), each = k)
       Z1 <- unlist(W[["U"]])
-      res[4]=cor((Z0+Z1)[ENV1],l$Yield[ENV1])
-      res[5]=cor((Z0+Z1)[ENV2],l$Yield[ENV2])
-      res[6]=cor((Z0+Z1)[ENV3],l$Yield[ENV3])
+      res[4]=cor((Z0+Z1)[ENV1],l$Trait[ENV1])
+      res[5]=cor((Z0+Z1)[ENV2],l$Trait[ENV2])
+      res[6]=cor((Z0+Z1)[ENV3],l$Trait[ENV3])
       
       Z0 <- rep(c(MGE[["Beta"]][["Estimate"]][1], MGE[["Beta"]][["Estimate"]][1] + MGE[["Beta"]][["Estimate"]][-1]), each = k)
       Z1 <- unlist(MGE[["U"]][-1]) + unlist(MGE[["U"]][1])
-      res[7]=cor((Z0+Z1)[ENV1],l$Yield[ENV1])
-      res[8]=cor((Z0+Z1)[ENV2],l$Yield[ENV2])
-      res[9]=cor((Z0+Z1)[ENV3],l$Yield[ENV3])
+      res[7]=cor((Z0+Z1)[ENV1],l$Trait[ENV1])
+      res[8]=cor((Z0+Z1)[ENV2],l$Trait[ENV2])
+      res[9]=cor((Z0+Z1)[ENV3],l$Trait[ENV3])
       
       Z0=rep(c(M[["Beta"]][["Estimate"]][1],sum(M[["Beta"]][["Estimate"]][1:2]),sum(M[["Beta"]][["Estimate"]][c(1,3)])),each=k)
-      Z1=c(M[["U"]][["1:Name"]][["Yield"]]+(M[["U"]][["2:1:Name"]][["Yield"]][-(1:k)])+(M[["U"]][["3:1:Name"]][["Yield"]][-(1:k)]),
-           M[["U"]][["2:Name"]][["Yield"]]+(M[["U"]][["2:1:Name"]][["Yield"]][1:k])+(M[["U"]][["3:2:Name"]][["Yield"]][-(1:k)]),
-           M[["U"]][["3:Name"]][["Yield"]]+(M[["U"]][["3:1:Name"]][["Yield"]][1:k])+(M[["U"]][["3:2:Name"]][["Yield"]][1:k]))
-      res[10]=cor((Z0+Z1)[ENV1],l$Yield[ENV1])
-      res[11]=cor((Z0+Z1)[ENV2],l$Yield[ENV2])
-      res[12]=cor((Z0+Z1)[ENV3],l$Yield[ENV3])
+      Z1=c(M[["U"]][["1:Name"]][["Trait"]]+(M[["U"]][["2:1:Name"]][["Trait"]][-(1:k)])+(M[["U"]][["3:1:Name"]][["Trait"]][-(1:k)]),
+           M[["U"]][["2:Name"]][["Trait"]]+(M[["U"]][["2:1:Name"]][["Trait"]][1:k])+(M[["U"]][["3:2:Name"]][["Trait"]][-(1:k)]),
+           M[["U"]][["3:Name"]][["Trait"]]+(M[["U"]][["3:1:Name"]][["Trait"]][1:k])+(M[["U"]][["3:2:Name"]][["Trait"]][1:k]))
+      res[10]=cor((Z0+Z1)[ENV1],l$Trait[ENV1])
+      res[11]=cor((Z0+Z1)[ENV2],l$Trait[ENV2])
+      res[12]=cor((Z0+Z1)[ENV3],l$Trait[ENV3])
       
       if(!is.null(M)){     
         if (M[["sigma"]][["1:Name"]]==0) {
@@ -499,6 +499,3 @@ fold_3_4 <- function(Y,K,cv,fold,random){
   return(answer)
   stopCluster(cl)
 }
-
-
-
