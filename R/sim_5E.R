@@ -2,7 +2,7 @@ library(doParallel)
 #' Simulates 5 environments with 5-fold and 8-fold cross-validation (CV-O, CV-NO).
 #'
 #' @param omgaG_v0  A diagonal variance-covariance matrix across environments.
-#' @param Y         A data.frame containing "trait", "environment", and "name".
+#' @param Y         A data.frame containing "Trait", "Name", and "ENV".
 #' @param mu        The mean value for each environment.
 #' @param rho       The genetic correlation between environments.
 #' @param K         An additive genetic relationship matrix.
