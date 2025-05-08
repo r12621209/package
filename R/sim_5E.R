@@ -1,4 +1,3 @@
-library(doParallel)
 #' Simulate Cross-Validation in Three Environments
 #' 
 #' Simulates 5 environments with 5-fold and 8-fold cross-validation (CV-O, CV-NO).
@@ -31,7 +30,8 @@ library(doParallel)
 
 
 sim_5E=function(omgaG_v0, Y, mu, rho, K, cv, fold, random){
-  
+
+  library(doParallel)
   ### set prior parameters
   k=nrow(K)
   mu <- rep(mu,each=k)
