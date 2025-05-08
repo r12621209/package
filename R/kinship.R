@@ -1,5 +1,6 @@
 
 #' The function calculate additive matrix 
+#'
 #' major allele = 2, heterozygote = 1, minor allele = 0.
 #'
 #' @param X  A a set of SNP data.
