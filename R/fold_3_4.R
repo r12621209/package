@@ -1,6 +1,10 @@
 library(doParallel)
-#' Cross-validation for 3-fold and 4-fold with CV-O and CV-NO
+#' Perform Cross-Validation on Real Data
 #'
+#' Applies 3-fold and 4-fold cross-validation on real phenotypic and genotypic data.
+#' Supports both CV-O and CV-NO.
+#'
+
 #' @param Y         A data.frame containing "Trait", "Name", and "ENV".
 #' @param K         An additive genetic relationship matrix.
 #' @param cv        Different cross-validation problems, CV-O=1 and CV-NO=2.
