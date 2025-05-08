@@ -17,14 +17,13 @@ library(doParallel)
 #' @import MASS
 #' @import dplyr
 #' @examples
-#'
-#'data(DST2_maize)
-#'K.t2 <- kinship(snp_DST2_maize)
-#'Yt2.s <- data.frame(
-#'  Trait = as.vector(phe_DST2_maize),
-#'  Name = factor(rep(rownames(K.t2), ncol(phe_DST2_maize))),
-#'  Env = factor(rep(seq_len(ncol(phe_DST2_maize)), each = nrow(phe_DST2_maize)))
-#')
+#' data(DST2_maize)
+#' K.t2 <- kinship(snp_DST2_maize)
+#' Yt2.s <- data.frame(
+#'   Trait = as.vector(phe_DST2_maize),
+#'   Name = factor(rep(rownames(K.t2), ncol(phe_DST2_maize))),
+#'   Env  = factor(rep(seq_len(ncol(phe_DST2_maize)), each = nrow(phe_DST2_maize)))
+#' )
 #' mu <- c(10,15,20,25,30)
 #' omgaG_v0=diag(c(1,1.5,2,2.5,3))
 #' sim_cvO_8_5E <- sim_5E(omgaG_v0 = omgaG_v0, Y = Yt2.s, mu = mu, rho = 0, K = K.t2, cv = 1,fold = 5,random = 0)
