@@ -1,4 +1,3 @@
-library(doParallel)
 #' Perform Cross-Validation on Real Data
 #'
 #' Applies 3-fold and 4-fold cross-validation on real phenotypic and genotypic data.
@@ -28,7 +27,8 @@ library(doParallel)
 
 
 fold_3_4 <- function(Y,K,cv,fold,random){
-  
+
+  library(doParallel)
   ### set prior parameters
   k=nrow(K)
   
