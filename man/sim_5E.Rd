@@ -2,14 +2,14 @@
 % Please edit documentation in R/sim_5E.R
 \name{sim_5E}
 \alias{sim_5E}
-\title{Simulates 5 environments with 5-fold and 8-fold cross-validation (CV-O, CV-NO).}
+\title{Simulate Cross-Validation in Three Environments}
 \usage{
 sim_5E(omgaG_v0, Y, mu, rho, K, cv, fold, random)
 }
 \arguments{
 \item{omgaG_v0}{A diagonal variance-covariance matrix across environments.}
 
-\item{Y}{A data.frame containing "trait", "environment", and "name".}
+\item{Y}{A data.frame containing "Trait", "Name", and "ENV".}
 
 \item{mu}{The mean value for each environment.}
 
@@ -28,6 +28,13 @@ Simulates 5 environments with 5-fold and 8-fold cross-validation (CV-O, CV-NO).
 }
 \examples{
 
+data(DST2_maize)
+K.t2 <- kinship(snp_DST2_maize)
+Yt2.s <- data.frame(
+ Trait = as.vector(phe_DST2_maize),
+ Name = factor(rep(rownames(K.t2), ncol(phe_DST2_maize))),
+ Env = factor(rep(seq_len(ncol(phe_DST2_maize)), each = nrow(phe_DST2_maize)))
+)
 mu <- c(10,15,20,25,30)
 omgaG_v0=diag(c(1,1.5,2,2.5,3))
 sim_cvO_8_5E <- sim_5E(omgaG_v0 = omgaG_v0, Y = Yt2.s, mu = mu, rho = 0, K = K.t2, cv = 1,fold = 5,random = 0)

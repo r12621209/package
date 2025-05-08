@@ -2,8 +2,7 @@
 % Please edit documentation in R/kinship.R
 \name{kinship}
 \alias{kinship}
-\title{The function calculate additive matrix
-major allele = 2, heterozygote = 1, minor allele = 0.}
+\title{The function calculate additive matrix}
 \usage{
 kinship(X)
 }
@@ -11,7 +10,6 @@ kinship(X)
 \item{X}{A a set of SNP data.}
 }
 \description{
-The function calculate additive matrix
 major allele = 2, heterozygote = 1, minor allele = 0.
 }
 \examples{
