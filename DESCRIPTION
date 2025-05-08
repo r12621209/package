@@ -1,10 +1,10 @@
 Package: package
-Title: What the Package Does (One Line, Title Case)
+Title: A comparison of genomic selection models in multi-environment trials
 Version: 0.0.0.9000
 Authors@R: 
     person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+Description: R codes in "A comparison of genomic selection models in multi-environment trials".
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
 Encoding: UTF-8
@@ -15,3 +15,4 @@ Imports:
     doParallel,
     MASS,
     dplyr
+
