@@ -13,6 +13,13 @@ library(doParallel)
 #' @import dplyr
 #' @examples
 #' 
+#'data(DST2_maize)
+#'K.t2 <- kinship(snp_DST2_maize)
+#'Yt2.s <- data.frame(
+#'  Trait = as.vector(phe_DST2_maize),
+#'  Name = factor(rep(rownames(K.t2), ncol(phe_DST2_maize))),
+#'  Env = factor(rep(seq_len(ncol(phe_DST2_maize)), each = nrow(phe_DST2_maize)))
+#')
 #' fold_3_cvO <- fold_3_4(Y=Yt2.s,K=K.t2,cv=1,fold=3,random=0)
 
 
