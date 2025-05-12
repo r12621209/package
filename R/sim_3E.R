@@ -35,6 +35,7 @@
 sim_3E = function(omgaG_v0, Y, mu, rho, K, cv, fold, random){
 
   library(doParallel)
+  library(sommer)
   ### set prior parameters
   k=nrow(K)
   mu <- rep(mu,each=k)
