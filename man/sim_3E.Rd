@@ -31,9 +31,9 @@ Simulates 3 environments with 3-fold and 4-fold cross-validation (CV-O, CV-NO).
 data(DST2_maize)
 K.t2 <- kinship(snp_DST2_maize)
 Yt2.s <- data.frame(
- Trait = as.vector(phe_DST2_maize),
- Name = factor(rep(rownames(K.t2), ncol(phe_DST2_maize))),
- Env = factor(rep(seq_len(ncol(phe_DST2_maize)), each = nrow(phe_DST2_maize)))
+  Trait = as.vector(phe_DST2_maize),
+  Name = factor(rep(rownames(K.t2), ncol(phe_DST2_maize))),
+  Env  = factor(rep(seq_len(ncol(phe_DST2_maize)), each = nrow(phe_DST2_maize)))
 )
 mu <- c(10,15,20)
 omgaG_v0 <- diag(c(1,1.5,2))
