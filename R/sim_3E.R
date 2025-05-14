@@ -63,43 +63,35 @@ sim_3E = function(omgaG_v0, Y, mu, rho, K, cv, fold, random){
     E <- diag(length(unique(Yna$Env)))
     rownames(E) <- colnames(E) <- unique(Yna$Env)
     EA <- kronecker(E, K, make.dimnames = TRUE)
-    
     A=NULL 
-    A <- mmer(Trait ~ Env,
-              random = ~ vsr(Env:Name, Gu = EA),
-              rcov = ~ vsr(dsr(Env), units),
-              data = Yna, verbose = FALSE,
-              method = 'AI',
-              nIters = 10000)
+    A <- mmes(Trait ~ Env,
+              random= ~vsm(ism(Env:Name), Gu=EA),              
+              rcov=~ vsm(dsm(Env),ism(units)),
+              data = Yna, verbose = FALSE)
+    
     
     ### WGBLUP model
     W=NULL 
-    W <- mmer(Trait ~ Env,
-              random = ~ vsr(dsr(Env), Name, Gu = K),
-              rcov = ~ vsr(dsr(Env), units),
-              method = 'AI',
-              nIters = 10000,
+    W <- mmes(Trait ~ Env,
+              random= ~ vsm(dsm(Env),ism(Name), Gu = K),
+              rcov=~ vsm(dsm(Env),ism(units)),
               data = Yna, verbose = FALSE)
-    
     ### MGE model
+    
     MGE=NULL 
     MGE <- tryCatch({
-      mmer(Trait ~ Env,
-           random = ~ vsr(Name, Gu = K) + vsr(dsr(Env), Name, Gu = K),
-           rcov = ~ vsr(dsr(Env), units),
-           data = Yna, verbose = FALSE,
-           method = 'AI',
-           nIters = 10000, tolParInv = 1e-06)
+      mmes(Trait ~ Env,
+           random = ~ vsm(ism(Name), Gu = K) +  vsm(dsm(Env),ism(Name), Gu = K),
+           rcov=~ vsm(dsm(Env),ism(units)),
+           data = Yna, verbose = FALSE, tolParInv = 1e-06)
     }, error = function(e) {
       for (rep in 1:100) {
         tolParInv <- 1e-06 + 0.0005 * rep
         MGE <- tryCatch({
-          mmer(Trait ~ Env,
-               random = ~ vsr(Name, Gu = K) + vsr(dsr(Env), Name, Gu = K),
-               rcov = ~ vsr(dsr(Env), units),
-               data = Yna, verbose = FALSE,
-               method = 'AI',
-               nIters = 10000, tolParInv = tolParInv)
+          mmes(Trait ~ Env,
+               random = ~ vsm(ism(Name), Gu = K) +  vsm(dsm(Env),ism(Name), Gu = K),
+               rcov=~ vsm(dsm(Env),ism(units)),
+               data = Yna, verbose = FALSE, tolParInv = tolParInv)
         }, error = function(e) NULL)
         if (!is.null(MGE)) break
       }
@@ -109,25 +101,19 @@ sim_3E = function(omgaG_v0, Y, mu, rho, K, cv, fold, random){
     ### MGBLUP model
     M=NULL 
     M <- tryCatch({
-      mmer(Trait ~ Env,
-           random = ~ vsr(usr(Env), Name, Gu = K),
-           rcov = ~ vsr(dsr(Env), units),
-           data = Yna,
-           verbose = FALSE,
-           nIters = 10000,
-           method = 'AI',
+      mmes(Trait ~ Env,
+           random = ~ vsm(usm(Env),ism(Name), Gu = K),
+           rcov=~ vsm(dsm(Env),ism(units)),
+           data = Yna, verbose = FALSE,
            tolParInv = 1e-06)
     }, error = function(e) {
       for (rep in 1:100) {
         tolParInv <- 1e-06 + 0.05 * rep
         M <- tryCatch({
-          mmer(Trait ~ Env,
-               random = ~ vsr(usr(Env), Name, Gu = K),
-               rcov = ~ vsr(dsr(Env), units),
-               data = Yna,
-               verbose = FALSE,
-               nIters = 10000,
-               method = 'AI',
+          mmes(Trait ~ Env,
+               random = ~ vsm(usm(Env),ism(Name), Gu = K),
+               rcov=~ vsm(dsm(Env),ism(units)),
+               data = Yna, verbose = FALSE,
                tolParInv = tolParInv)
         }, error = function(e) NULL)
         if (!is.null(M)) break
@@ -142,41 +128,40 @@ sim_3E = function(omgaG_v0, Y, mu, rho, K, cv, fold, random){
                        "MGBLUP-1", "MGBLUP-2", "MGBLUP-3")
     
     ### Compute correlation coefficients
-    Z0 <- rep(c(A[["Beta"]][["Estimate"]][1], A[["Beta"]][["Estimate"]][1] + A[["Beta"]][["Estimate"]][-1]), each = k)
-    Z1 <- A[["U"]][["u:Env:Name"]][["Trait"]]
+    Z0 <- rep(c(A[["b"]][1], A[["b"]][1] + A[["b"]][-1]), each = k)
+    Z1 <- A[["u"]]
     res[1]=cor((Z0+Z1)[ENV1],l$TBV[ENV1])
     res[2]=cor((Z0+Z1)[ENV2],l$TBV[ENV2])
     res[3]=cor((Z0+Z1)[ENV3],l$TBV[ENV3])
     
-    Z0 <- rep(c(W[["Beta"]][["Estimate"]][1], W[["Beta"]][["Estimate"]][1] + W[["Beta"]][["Estimate"]][-1]), each = k)
-    Z1 <- unlist(W[["U"]])
+    Z0 <- rep(c(W[["b"]][1], W[["b"]][1] + W[["b"]][-1]), each = k)
+    Z1 <- W[["u"]]
     res[4]=cor((Z0+Z1)[ENV1],l$TBV[ENV1])
     res[5]=cor((Z0+Z1)[ENV2],l$TBV[ENV2])
     res[6]=cor((Z0+Z1)[ENV3],l$TBV[ENV3])
     
-    Z0 <- rep(c(MGE[["Beta"]][["Estimate"]][1], MGE[["Beta"]][["Estimate"]][1] + MGE[["Beta"]][["Estimate"]][-1]), each = k)
-    Z1 <- unlist(MGE[["U"]][-1]) + unlist(MGE[["U"]][1])
+    Z0 <- rep(c(MGE[["b"]][1], MGE[["b"]][1] + MGE[["b"]][-1]), each = k)
+    Z1 <- unlist(MGE[["u"]][1:k]) + unlist(MGE[["u"]][-(1:k)])
     res[7]=cor((Z0+Z1)[ENV1],l$TBV[ENV1])
     res[8]=cor((Z0+Z1)[ENV2],l$TBV[ENV2])
     res[9]=cor((Z0+Z1)[ENV3],l$TBV[ENV3])
     
-    Z0=rep(c(M[["Beta"]][["Estimate"]][1],sum(M[["Beta"]][["Estimate"]][1:2]),sum(M[["Beta"]][["Estimate"]][c(1,3)])),each=k)
-    Z1=c(M[["U"]][["1:Name"]][["Trait"]]+(M[["U"]][["2:1:Name"]][["Trait"]][-(1:k)])+(M[["U"]][["3:1:Name"]][["Trait"]][-(1:k)]),
-         M[["U"]][["2:Name"]][["Trait"]]+(M[["U"]][["2:1:Name"]][["Trait"]][1:k])+(M[["U"]][["3:2:Name"]][["Trait"]][-(1:k)]),
-         M[["U"]][["3:Name"]][["Trait"]]+(M[["U"]][["3:1:Name"]][["Trait"]][1:k])+(M[["U"]][["3:2:Name"]][["Trait"]][1:k]))
+    Z0 <- rep(c(M[["b"]][1], W[["b"]][1] + M[["b"]][-1]), each = k)
+    Z1 <- M[["u"]]
     res[10]=cor((Z0+Z1)[ENV1],l$TBV[ENV1])
     res[11]=cor((Z0+Z1)[ENV2],l$TBV[ENV2])
     res[12]=cor((Z0+Z1)[ENV3],l$TBV[ENV3])
     
     ### Ensure M model variance is not zero
+    var.diag <- diag(M[["theta"]][["vsm(usm(Env), ism(Name), Gu = K)"]])
     if(!is.null(M)){     
-      if (M[["sigma"]][["1:Name"]]==0) {
+      if (var.diag[1]==0) {
         res[10]=NA
       }
-      if (M[["sigma"]][["2:Name"]]==0) {
+      if (var.diag[2]==0) {
         res[11]=NA
       }
-      if (M[["sigma"]][["3:Name"]]==0) {
+      if (var.diag[3]==0) {
         res[12]=NA
       }
     }
