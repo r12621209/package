@@ -25,13 +25,14 @@
 #' )
 #' mu <- c(10,15,20,25,30)
 #' omgaG_v0=diag(c(1,1.5,2,2.5,3))
-#' sim_cvO_8_5E <- sim_5E(omgaG_v0 = omgaG_v0, Y = Yt2.s, mu = mu, rho = 0, K = K.t2, cv = 1,fold = 5,random = 0)
+#' sim_cvO_8_5E <- sim_5E(omgaG_v0 = omgaG_v0, Y = Yt2.s, mu = mu, rho = 0.8, K = K.t2, cv = 2,fold = 8,random = 0)
 #'
 
 
 sim_5E=function(omgaG_v0, Y, mu, rho, K, cv, fold, random){
-
+  
   library(doParallel)
+  library(sommer)
   ### set prior parameters
   k=nrow(K)
   mu <- rep(mu,each=k)
@@ -52,7 +53,7 @@ sim_5E=function(omgaG_v0, Y, mu, rho, K, cv, fold, random){
   SigmaG=kronecker(omgaG, K)
   SigmaE=kronecker(omgaE, diag(k))
   
-  {count_res <- function(ENV1,ENV2,ENV3,ENV4,ENV5){
+  {count_res <- function(ENV1,ENV2,ENV3,ENV4,ENV5,l){
     
     if (k==301) {
       m_tolParInv <- 0.01 ; mge_tolParInv <- 1e-06
@@ -68,39 +69,34 @@ sim_5E=function(omgaG_v0, Y, mu, rho, K, cv, fold, random){
     rownames(E) <- colnames(E) <- unique(Yna$Env)
     EA <- kronecker(E, K, make.dimnames = TRUE)
     
-    A=NULL 
-    A <- mmer(Trait ~ Env,
-              random = ~ vsr(Env:Name, Gu = EA),
-              rcov = ~ vsr(dsr(Env), units),
-              data = Yna, verbose = FALSE,
-              method = 'AI',
-              nIters = 10000)
+    
+    ### AGBLUP modelA=NULL 
+    A <- mmes(Trait ~ Env,
+              random= ~vsm(ism(Env:Name), Gu=EA),              
+              rcov=~ vsm(dsm(Env),ism(units)),
+              data = Yna, verbose = FALSE)
+    
+    ### WGBLUP model
     W=NULL 
-    W <- mmer(Trait ~ Env,
-              random = ~ vsr(dsr(Env), Name, Gu = K),
-              rcov = ~ vsr(dsr(Env), units),
-              method = 'AI',
-              nIters = 10000,
+    W <- mmes(Trait ~ Env,
+              random= ~ vsm(dsm(Env),ism(Name), Gu = K),
+              rcov=~ vsm(dsm(Env),ism(units)),
               data = Yna, verbose = FALSE)
     
     MGE=NULL 
     MGE <- tryCatch({
-      mmer(Trait ~ Env,
-           random = ~ vsr(Name, Gu = K) + vsr(dsr(Env), Name, Gu = K),
-           rcov = ~ vsr(dsr(Env), units),
-           data = Yna, verbose = FALSE,
-           method = 'AI',
-           nIters = 10000, tolParInv = 1e-06)
+      mmes(Trait ~ Env,
+           random = ~ vsm(ism(Name), Gu = K) +  vsm(dsm(Env),ism(Name), Gu = K),
+           rcov=~ vsm(dsm(Env),ism(units)),
+           data = Yna, verbose = FALSE, tolParInv = 1e-06)
     }, error = function(e) {
-      for (rep in 1:100) {
+      for (rep in 1:50) {
         tolParInv <- 1e-06 + mge_tolParInv * rep
         MGE <- tryCatch({
-          mmer(Trait ~ Env,
-               random = ~ vsr(Name, Gu = K) + vsr(dsr(Env), Name, Gu = K),
-               rcov = ~ vsr(dsr(Env), units),
-               data = Yna, verbose = FALSE,
-               method = 'AI',
-               nIters = 10000, tolParInv = tolParInv)
+          mmes(Trait ~ Env,
+               random = ~ vsm(ism(Name), Gu = K) +  vsm(dsm(Env),ism(Name), Gu = K),
+               rcov=~ vsm(dsm(Env),ism(units)),
+               data = Yna, verbose = FALSE, tolParInv = tolParInv)
         }, error = function(e) NULL)
         if (!is.null(MGE)) break
       }
@@ -109,25 +105,19 @@ sim_5E=function(omgaG_v0, Y, mu, rho, K, cv, fold, random){
     
     M=NULL 
     M <- tryCatch({
-      mmer(Trait ~ Env,
-           random = ~ vsr(usr(Env), Name, Gu = K),
-           rcov = ~ vsr(dsr(Env), units),
-           data = Yna,
-           verbose = FALSE,
-           nIters = 10000,
-           method = 'AI',
+      mmes(Trait ~ Env,
+           random = ~ vsm(usm(Env),ism(Name), Gu = K),
+           rcov=~ vsm(dsm(Env),ism(units)),
+           data = Yna, verbose = FALSE,
            tolParInv = 1e-06)
     }, error = function(e) {
-      for (rep in 1:100) {
+      for (rep in 1:50) {
         tolParInv <- 1e-06 + m_tolParInv * rep
         M <- tryCatch({
-          mmer(Trait ~ Env,
-               random = ~ vsr(usr(Env), Name, Gu = K),
-               rcov = ~ vsr(dsr(Env), units),
-               data = Yna,
-               verbose = FALSE,
-               nIters = 10000,
-               method = 'AI',
+          mmes(Trait ~ Env,
+               random = ~ vsm(usm(Env),ism(Name), Gu = K),
+               rcov=~ vsm(dsm(Env),ism(units)),
+               data = Yna, verbose = FALSE,
                tolParInv = tolParInv)
         }, error = function(e) NULL)
         if (!is.null(M)) break
@@ -141,10 +131,9 @@ sim_5E=function(omgaG_v0, Y, mu, rho, K, cv, fold, random){
                        "MGE-1", "MGE-2", "MGE-3", "MGE-4", "MGE-5",
                        "MGBLUP-1", "MGBLUP-2", "MGBLUP-3", "MGBLUP-4", "MGBLUP-5")
     
-    #A
-    Z0=rep(c(A[["Beta"]][["Estimate"]][1],A[["Beta"]][["Estimate"]][1]+A[["Beta"]][["Estimate"]][-1]),each=k)
-    Z1=A[["U"]][["u:Env:Name"]][["Trait"]]
-    
+
+    Z0 <- rep(c(A[["b"]][1], A[["b"]][1] + A[["b"]][-1]), each = k)
+    Z1 <- A[["u"]]
     res[1]=cor((Z0+Z1)[ENV1],l$TBV[ENV1])
     res[2]=cor((Z0+Z1)[ENV2],l$TBV[ENV2])
     res[3]=cor((Z0+Z1)[ENV3],l$TBV[ENV3])
@@ -152,56 +141,51 @@ sim_5E=function(omgaG_v0, Y, mu, rho, K, cv, fold, random){
     res[5]=cor((Z0+Z1)[ENV5],l$TBV[ENV5])
     
     
-    #W
-    Z0=rep(c(W[["Beta"]][["Estimate"]][1],W[["Beta"]][["Estimate"]][1]+W[["Beta"]][["Estimate"]][-1]),each=k)
-    Z1=unlist(W[["U"]])
+    Z0 <- rep(c(W[["b"]][1], W[["b"]][1] + W[["b"]][-1]), each = k)
+    Z1 <- W[["u"]]
     res[6]=cor((Z0+Z1)[ENV1],l$TBV[ENV1])
     res[7]=cor((Z0+Z1)[ENV2],l$TBV[ENV2])
     res[8]=cor((Z0+Z1)[ENV3],l$TBV[ENV3])
     res[9]=cor((Z0+Z1)[ENV4],l$TBV[ENV4])
     res[10]=cor((Z0+Z1)[ENV5],l$TBV[ENV5])
     
-    #MGE
-    Z0=rep(c(MGE[["Beta"]][["Estimate"]][1],MGE[["Beta"]][["Estimate"]][1]+MGE[["Beta"]][["Estimate"]][-1]),each=k)
-    Z1=unlist(MGE[["U"]][-1])+unlist(MGE[["U"]][1])
+
+    Z0 <- rep(c(MGE[["b"]][1], MGE[["b"]][1] + MGE[["b"]][-1]), each = k)
+    Z1 <- unlist(MGE[["u"]][1:k]) + unlist(MGE[["u"]][-(1:k)])
     res[11]=cor((Z0+Z1)[ENV1],l$TBV[ENV1])
     res[12]=cor((Z0+Z1)[ENV2],l$TBV[ENV2])
     res[13]=cor((Z0+Z1)[ENV3],l$TBV[ENV3])
     res[14]=cor((Z0+Z1)[ENV4],l$TBV[ENV4])
     res[15]=cor((Z0+Z1)[ENV5],l$TBV[ENV5])
-    #M
-    Z0=rep(c(M[["Beta"]][["Estimate"]][1],M[["Beta"]][["Estimate"]][1]+M[["Beta"]][["Estimate"]][-1]),each=k)
-    a=M[["U"]][[1]][["Trait"]]+(M[["U"]][[2]][["Trait"]]+M[["U"]][[4]][["Trait"]]+M[["U"]][[7]][["Trait"]]+M[["U"]][[11]][["Trait"]])[-(1:k)]
-    b=M[["U"]][[3]][["Trait"]]+M[["U"]][[2]][["Trait"]][1:k]+(M[["U"]][[5]][["Trait"]]+M[["U"]][[8]][["Trait"]]+M[["U"]][[12]][["Trait"]])[-(1:k)]
-    c=M[["U"]][[6]][["Trait"]]+(M[["U"]][[4]][["Trait"]]+M[["U"]][[5]][["Trait"]])[1:k]+(M[["U"]][[9]][["Trait"]]+M[["U"]][[13]][["Trait"]])[-(1:k)]
-    d=M[["U"]][[10]][["Trait"]]+(M[["U"]][[7]][["Trait"]]+M[["U"]][[8]][["Trait"]]+M[["U"]][[9]][["Trait"]])[1:k]+(M[["U"]][[14]][["Trait"]])[-(1:k)]
-    e=M[["U"]][[15]][["Trait"]]+(M[["U"]][[11]][["Trait"]]+M[["U"]][[12]][["Trait"]]+M[["U"]][[13]][["Trait"]]+M[["U"]][[14]][["Trait"]])[1:k]
     
-    Z1=c(a,b,c,d,e)
-    
+    Z0 <- rep(c(M[["b"]][1], M[["b"]][1] + M[["b"]][-1]), each = k)
+    Z1 <- M[["u"]]
     res[16]=cor((Z0+Z1)[ENV1],l$TBV[ENV1])
     res[17]=cor((Z0+Z1)[ENV2],l$TBV[ENV2])
     res[18]=cor((Z0+Z1)[ENV3],l$TBV[ENV3])
     res[19]=cor((Z0+Z1)[ENV4],l$TBV[ENV4])
     res[20]=cor((Z0+Z1)[ENV5],l$TBV[ENV5])
     
-    if(!is.null(M)){  
-      if (M[["sigma"]][["1:Name"]]==0) {
+    ### Ensure M model variance is not zero
+    var.diag <- diag(M[["theta"]][["vsm(usm(Env), ism(Name), Gu = K)"]])
+    if(!is.null(M)){     
+      if (var.diag[1]==0) {
         res[16]=NA
       }
-      if (M[["sigma"]][["2:Name"]]==0) {
+      if (var.diag[2]==0) {
         res[17]=NA
       }
-      if (M[["sigma"]][["3:Name"]]==0) {
+      if (var.diag[3]==0) {
         res[18]=NA
       }
-      if (M[["sigma"]][["4:Name"]]==0) {
+      if (var.diag[4]==0) {
         res[19]=NA
       }
-      if (M[["sigma"]][["5:Name"]]==0) {
+      if (var.diag[5]==0) {
         res[20]=NA
       }
     }
+    
     return(res)
   }}
   
@@ -221,6 +205,7 @@ sim_5E=function(omgaG_v0, Y, mu, rho, K, cv, fold, random){
       ### Simulate error effect
       ehat <- mvrnorm(n = 1, mu = rep(0, nrow(SigmaE)), Sigma = SigmaE)
       ### Create data frame
+      l <- NULL
       l <- data.frame(Trait=(mu + ghat + ehat),TBV=(mu + ghat),Name=rep(Y[1:k,'Name'],5),Env=rep(1:5,each=k))
       l$Name <- as.factor(l$Name)
       l$Env <- as.factor(l$Env)
@@ -263,7 +248,7 @@ sim_5E=function(omgaG_v0, Y, mu, rho, K, cv, fold, random){
       } else {
         stop("Invalid combination of cv and fold. Allowed values: (cv=1, fold=5), (cv=2, fold=5), (cv=1, fold=8), (cv=2, fold=8).")
       }
-      res=count_res(ENV1,ENV2,ENV3,ENV4,ENV5)
+      res=count_res(ENV1,ENV2,ENV3,ENV4,ENV5,l)
       res
     }
     if(i==1){result=answer}else{
