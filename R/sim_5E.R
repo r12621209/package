@@ -1,4 +1,4 @@
-#' Simulate Cross-Validation in Three Environments
+#' Simulate Cross-Validation in Five Environments
 #' 
 #' Simulates 5 environments with 5-fold and 8-fold cross-validation (CV-O, CV-NO).
 #'
@@ -25,7 +25,7 @@
 #' )
 #' mu <- c(10,15,20,25,30)
 #' omgaG_v0=diag(c(1,1.5,2,2.5,3))
-#' sim_cvO_8_5E <- sim_5E(omgaG_v0 = omgaG_v0, Y = Yt2.s, mu = mu, rho = 0.8, K = K.t2, cv = 2,fold = 8,random = 0)
+#' sim_cvNO_8_5E <- sim_5E(omgaG_v0 = omgaG_v0, Y = Yt2.s, mu = mu, rho = 0.8, K = K.t2, cv = 2,fold = 8,random = 0)
 #'
 
 
@@ -70,7 +70,8 @@ sim_5E=function(omgaG_v0, Y, mu, rho, K, cv, fold, random){
     EA <- kronecker(E, K, make.dimnames = TRUE)
     
     
-    ### AGBLUP modelA=NULL 
+    ### AGBLUP model
+    A=NULL 
     A <- mmes(Trait ~ Env,
               random= ~vsm(ism(Env:Name), Gu=EA),              
               rcov=~ vsm(dsm(Env),ism(units)),
@@ -90,7 +91,7 @@ sim_5E=function(omgaG_v0, Y, mu, rho, K, cv, fold, random){
            rcov=~ vsm(dsm(Env),ism(units)),
            data = Yna, verbose = FALSE, tolParInv = 1e-06)
     }, error = function(e) {
-      for (rep in 1:50) {
+      for (rep in 1:100) {
         tolParInv <- 1e-06 + mge_tolParInv * rep
         MGE <- tryCatch({
           mmes(Trait ~ Env,
@@ -111,7 +112,7 @@ sim_5E=function(omgaG_v0, Y, mu, rho, K, cv, fold, random){
            data = Yna, verbose = FALSE,
            tolParInv = 1e-06)
     }, error = function(e) {
-      for (rep in 1:50) {
+      for (rep in 1:100) {
         tolParInv <- 1e-06 + m_tolParInv * rep
         M <- tryCatch({
           mmes(Trait ~ Env,
