@@ -51,7 +51,7 @@ sim_3E = function(omgaG_v0, Y, mu, rho, K, cv, fold, random){
   SigmaG=kronecker(omgaG, K)
   SigmaE=kronecker(omgaE, diag(k))
   
-  {count_res=function(ENV1,ENV2,ENV3){
+  {count_res=function(ENV1,ENV2,ENV3,l){
     
     ### Evaluate the model based on given ENV1, ENV2, ENV3
     r1=c(ENV1,ENV2,ENV3)
@@ -69,15 +69,14 @@ sim_3E = function(omgaG_v0, Y, mu, rho, K, cv, fold, random){
               rcov=~ vsm(dsm(Env),ism(units)),
               data = Yna, verbose = FALSE)
     
-    
     ### WGBLUP model
     W=NULL 
     W <- mmes(Trait ~ Env,
               random= ~ vsm(dsm(Env),ism(Name), Gu = K),
               rcov=~ vsm(dsm(Env),ism(units)),
               data = Yna, verbose = FALSE)
-    ### MGE model
     
+    ### MGE model
     MGE=NULL 
     MGE <- tryCatch({
       mmes(Trait ~ Env,
@@ -218,7 +217,7 @@ sim_3E = function(omgaG_v0, Y, mu, rho, K, cv, fold, random){
         stop("Invalid combination of cv and fold. Allowed values: (cv=1, fold=3), (cv=2, fold=3), (cv=1, fold=4), (cv=2, fold=4).")
       }
       
-      res=count_res(ENV1,ENV2,ENV3)
+      res=count_res(ENV1,ENV2,ENV3,l)
       res
     }
     
