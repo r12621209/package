@@ -1,9 +1,8 @@
 Package: package
 Title: A comparison of genomic selection models in multi-environment trials
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+    person("CA", "Wang", , "r12621209@ntu.edu.tw", role = c("aut", "cre"))
 Description: R codes in "A comparison of genomic selection models in multi-environment trials".
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
