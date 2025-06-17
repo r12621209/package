@@ -130,10 +130,10 @@ fold_3_4 <- function(Y,K,cv,fold,random){
       res[8]=cor((Z0+Z1)[ENV2],l$Trait[ENV2]) 
       
       if(!is.null(M)){     
-        if (M[["sigma"]][["1:Name"]]<=0) {
+        if (diag(M[["theta"]][["vsm(usm(Env), ism(Name), Gu = K)"]])[1]<=0) {
           res[7]=NA
         }
-        if (M[["sigma"]][["2:Name"]]<=0) {
+        if (diag(M[["theta"]][["vsm(usm(Env), ism(Name), Gu = K)"]])[2]<=0) {
           res[8]=NA
         }
         
@@ -242,13 +242,13 @@ fold_3_4 <- function(Y,K,cv,fold,random){
       res[12]=cor((Z0+Z1)[ENV3],l$Trait[ENV3])
       
       if(!is.null(M)){     
-        if (M[["sigma"]][["1:Name"]]==0) {
+        if (diag(M[["theta"]][["vsm(usm(Env), ism(Name), Gu = K)"]])[1]==0) {
           res[10]=NA
         }
-        if (M[["sigma"]][["2:Name"]]==0) {
+        if (diag(M[["theta"]][["vsm(usm(Env), ism(Name), Gu = K)"]])[2]==0) {
           res[11]=NA
         }
-        if (M[["sigma"]][["3:Name"]]==0) {
+        if (diag(M[["theta"]][["vsm(usm(Env), ism(Name), Gu = K)"]])[3]==0) {
           res[12]=NA
         }
       }
